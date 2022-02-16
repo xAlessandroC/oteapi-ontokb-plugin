@@ -61,7 +61,7 @@ setup(
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     url="https://github.com/xAlessandroC/oteapi-ontokb-plugin",
-    description="OTE-API Plugin.",
+    description="OntoKB plugin for OTEAPI.",
     long_description=(TOP_DIR / "README.md").read_text(encoding="utf8"),
     long_description_content_type="text/markdown",
     packages=find_packages(),
