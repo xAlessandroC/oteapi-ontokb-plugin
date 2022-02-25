@@ -7,15 +7,12 @@ from typing import TYPE_CHECKING
 
 from oteapi.plugins import create_strategy
 
-from oteapi.models.resourceconfig import SessionUpdate
+from oteapi.models import SessionUpdate
 from oteapi.models import AttrDict
+from typing import Any, Dict, Optional
+from oteapi.models.resourceconfig import ResourceConfig
 
 import requests
-
-if TYPE_CHECKING:
-    from typing import Any, Dict, Optional
-
-    from oteapi.models.resourceconfig import ResourceConfig
 
 class OntoKBConfig(AttrDict):
     """File-specific Configuration Data Model."""
@@ -31,7 +28,7 @@ class OntoKBResourceConfig(ResourceConfig):
     """File download strategy filter config."""
 
     configuration: OntoKBConfig = Field(
-        OntoKBConfig(), description="OntoKB access strategy-specific configuration."
+        OntoKBConfig(database="EMMO"), description="OntoKB access strategy-specific configuration."
     )
 
 class SessionUpdateOntoKBResource(SessionUpdate):
@@ -69,14 +66,14 @@ class OntoKBResourceStrategy:
             dictionary context.
 
         """
-        print("[ONTOKB PLUGIN]: Session " + session)
+        print("[ONTOKB PLUGIN]: Session " + str(session))
 
         result = {}
         if "sparql_query" in session and session["sparql_query"] != "":
             # SPARQL query defined
             print("[ONTOKB PLUGIN]: Getting query data")
             url = self.resource_config.accessUrl + "/databases/" + self.resource_config.configuration.database + "/query"
-            response = requests.post(url, data={'query': session["sparql_query"]})
+            response = requests.post(url, json={'query': session["sparql_query"]})
 
             result = response.json()
 
