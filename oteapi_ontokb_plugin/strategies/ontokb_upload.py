@@ -11,7 +11,7 @@ from oteapi.plugins import create_strategy
 from oteapi.models import SessionUpdate, AttrDict, DataCacheConfig
 from typing import Any, Dict, Optional
 from oteapi.models.resourceconfig import ResourceConfig
-from oteapi.strategies.download.file import FileConfig
+from oteapi.strategies.download.file import FileResourceConfig
 from oteapi.datacache import DataCache
 
 import requests
@@ -31,7 +31,7 @@ class OntoKBUploadConfig(AttrDict):
             "Name (with .rdf or .ttl extension) of the file to save"
         ),
     )
-    fileConfig: Optional[FileConfig] = Field(
+    fileConfig: Optional[FileResourceConfig] = Field(
         None,
         description=(
             "Configuration for the file strategy"
@@ -79,15 +79,18 @@ class OntoKBUploadStrategy:
 
         """
         print("[ONTOKB UPLOAD PLUGIN]: Session " + str(session))
+        print("[ONTOKB UPLOAD PLUGIN]: Session " + str(self.resource_config.configuration["fileConfig"]))
+        print("[ONTOKB UPLOAD PLUGIN]: Session " + str(self.resource_config.configuration.database))
+        print("[ONTOKB UPLOAD PLUGIN]: Session " + str(self.resource_config.configuration.filename))
 
-        cache = DataCache(self.download_config.configuration.datacache_config)
+        cache = DataCache(self.resource_config.configuration["datacache_config"])
 
         if cache.config.accessKey and cache.config.accessKey in cache:
             print("[ONTOKB UPLOAD PLUGIN]: Dato preso dalla cache")
             key = cache.config.accessKey
         else:
             print("[ONTOKB UPLOAD PLUGIN]: Dato scaricato con file strategy")
-            downloader = create_strategy("download", self.resource_config.configuration.fileConfig)
+            downloader = create_strategy("download", self.resource_config.configuration["fileConfig"])
             output = downloader.get()
             key = output["key"]
 
