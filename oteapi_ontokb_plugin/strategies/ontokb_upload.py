@@ -78,19 +78,15 @@ class OntoKBUploadStrategy:
             dictionary context.
 
         """
-        print("[ONTOKB UPLOAD PLUGIN]: Session " + str(session))
-        print("[ONTOKB UPLOAD PLUGIN]: Session " + str(self.resource_config.configuration["fileConfig"]))
-        print("[ONTOKB UPLOAD PLUGIN]: Session " + str(self.resource_config.configuration.database))
-        print("[ONTOKB UPLOAD PLUGIN]: Session " + str(self.resource_config.configuration.filename))
 
-        cache = DataCache(self.resource_config.configuration["datacache_config"])
+        cache = DataCache(self.resource_config.configuration.datacache_config)
 
         if cache.config.accessKey and cache.config.accessKey in cache:
-            print("[ONTOKB UPLOAD PLUGIN]: Dato preso dalla cache")
+            print("[ONTOKB UPLOAD PLUGIN]: Cached data")
             key = cache.config.accessKey
         else:
-            print("[ONTOKB UPLOAD PLUGIN]: Dato scaricato con file strategy")
-            downloader = create_strategy("download", self.resource_config.configuration["fileConfig"])
+            print("[ONTOKB UPLOAD PLUGIN]: Downloaded data by means of a filter strategy")
+            downloader = create_strategy("download", self.resource_config.configuration.fileConfig)
             output = downloader.get()
             key = output["key"]
 
