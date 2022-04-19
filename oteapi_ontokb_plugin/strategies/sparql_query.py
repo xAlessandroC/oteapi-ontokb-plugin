@@ -1,12 +1,11 @@
 """SPARQL query filter strategy."""
 # pylint: disable=no-self-use,unused-argument
-from pydantic.dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import Field
-
-from oteapi.models import SessionUpdate, AttrDict
+from oteapi.models import AttrDict, SessionUpdate
 from oteapi.models.filterconfig import FilterConfig
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Any, Dict
@@ -15,22 +14,18 @@ if TYPE_CHECKING:  # pragma: no cover
 class SessionUpdateSPARQLQueryFilter(SessionUpdate):
     """Return model for `SPARQLQuery`."""
 
-    sparql_query: str = Field(
-        ..., description="SPARQL query definition."
-    )
+    sparql_query: str = Field(..., description="SPARQL query definition.")
 
-    reasoning: bool = Field(
-        ...,
-        description="Enable reasoning for this specific query"
-    )
+    reasoning: bool = Field(..., description="Enable reasoning for this specific query")
+
 
 class SPARQLQueryConfig(AttrDict):
     """Configuration model for SPARQL query data."""
 
     reasoning: Optional[bool] = Field(
-        False,
-        description="Enable reasoning for this specific query"
+        False, description="Enable reasoning for this specific query"
     )
+
 
 class SPARQLQueryFilterConfig(FilterConfig):
     """SPARQL Query strategy filter config."""
@@ -55,7 +50,9 @@ class SPARQLQueryFilter:
         """Initialize strategy"""
         return SessionUpdate()
 
-    def get(self, session: "Optional[Dict[str, Any]]" = None) -> SessionUpdateSPARQLQueryFilter:
+    def get(
+        self, session: "Optional[Dict[str, Any]]" = None
+    ) -> SessionUpdateSPARQLQueryFilter:
         """Execute the strategy.
 
         This method will be called through the strategy-specific endpoint of the
@@ -69,4 +66,7 @@ class SPARQLQueryFilter:
             dictionary context.
 
         """
-        return SessionUpdateSPARQLQueryFilter(sparql_query = self.filter_config.query, reasoning = self.filter_config.configuration.reasoning)
+        return SessionUpdateSPARQLQueryFilter(
+            sparql_query=self.filter_config.query,
+            reasoning=self.filter_config.configuration.reasoning,
+        )

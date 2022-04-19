@@ -2,15 +2,13 @@
 # pylint: disable=no-self-use,unused-argument
 from typing import TYPE_CHECKING, Optional
 
-from oteapi.plugins import create_strategy
-
+import requests
 from oteapi.datacache import DataCache
 from oteapi.models import AttrDict, DataCacheConfig, ResourceConfig, SessionUpdate
+from oteapi.plugins import create_strategy
 from oteapi.strategies.download.file import FileResourceConfig
-from pydantic.dataclasses import dataclass
 from pydantic import Field
-
-import requests
+from pydantic.dataclasses import dataclass
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Any, Dict
@@ -21,32 +19,31 @@ class OntoKBUploadConfig(AttrDict):
 
     database: str = Field(
         ...,
-        description=(
-            "The database to connect to"
-        ),
+        description=("The database to connect to"),
     )
     filename: str = Field(
         None,
-        description=(
-            "Name (with .rdf or .ttl extension) of the file to save"
-        ),
+        description=("Name (with .rdf or .ttl extension) of the file to save"),
     )
     fileConfig: Optional[FileResourceConfig] = Field(
         None,
-        description=(
-            "Configuration for the file strategy"
-        ),
+        description=("Configuration for the file strategy"),
     )
     datacache_config: Optional[DataCacheConfig] = Field(
         None,
-        description="Configurations for the data cache for storing the downloaded file content.",
+        description=(
+            "Configurations for the data cache for storing the downloaded file "
+            "content."
+        ),
     )
+
 
 class OntoKBResourceUploadConfig(ResourceConfig):
     """File download strategy filter config."""
 
     configuration: OntoKBUploadConfig = Field(
-        OntoKBUploadConfig(database="EMMO"), description="OntoKB access strategy-specific configuration."
+        OntoKBUploadConfig(database="EMMO"),
+        description="OntoKB access strategy-specific configuration.",
     )
 
 
@@ -58,7 +55,7 @@ class OntoKBUploadStrategy:
 
     def initialize(self, session: "Optional[Dict[str, Any]]" = None) -> SessionUpdate:
         """Initialize strategy."""
-        
+
         # Validation part
         # Check if database actually exists
 
@@ -85,15 +82,26 @@ class OntoKBUploadStrategy:
             print("[ONTOKB UPLOAD PLUGIN]: Cached data")
             key = cache.config.accessKey
         else:
-            print("[ONTOKB UPLOAD PLUGIN]: Downloaded data by means of a filter strategy")
-            downloader = create_strategy("download", self.resource_config.configuration.fileConfig)
+            print(
+                "[ONTOKB UPLOAD PLUGIN]: Downloaded data by means of a filter strategy"
+            )
+            downloader = create_strategy(
+                "download", self.resource_config.configuration.fileConfig
+            )
             output = downloader.get()
             key = output["key"]
 
-        content = cache.get(key) # BinaryData
+        content = cache.get(key)  # BinaryData
 
-        url = self.resource_config.accessUrl + "/databases/" + self.resource_config.configuration.database
-        requests.post(url, files={"ontology":(self.resource_config.configuration.filename, content)})
+        url = (
+            self.resource_config.accessUrl
+            + "/databases/"
+            + self.resource_config.configuration.database
+        )
+        requests.post(
+            url,
+            files={"ontology": (self.resource_config.configuration.filename, content)},
+        )
 
         # Save result in session
         return SessionUpdate()
