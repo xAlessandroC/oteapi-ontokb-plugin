@@ -1,18 +1,16 @@
 """ONTOKB resource strategy class."""
-
 # pylint: disable=no-self-use,unused-argument
-from dataclasses import dataclass
-from pydantic import Field
 from typing import TYPE_CHECKING
 
-from oteapi.plugins import create_strategy
-
-from oteapi.models import SessionUpdate
-from oteapi.models import AttrDict
-from typing import Any, Dict, Optional
-from oteapi.models.resourceconfig import ResourceConfig
+from oteapi.models import AttrDict, ResourceConfig, SessionUpdate
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 import requests
+
+if TYPE_CHECKING:  # pragma: no cover
+    from typing import Any, Dict, Optional
+
 
 class OntoKBConfig(AttrDict):
     """File-specific Configuration Data Model."""
@@ -42,9 +40,9 @@ class SessionUpdateOntoKBResource(SessionUpdate):
 class OntoKBResourceStrategy:
     """Resource Strategy."""
 
-    resource_config: "OntoKBResourceConfig"
+    resource_config: OntoKBResourceConfig
 
-    def initialize(self, session: "Optional[Dict[str, Any]]" = None) -> "Dict[str, Any]":
+    def initialize(self, session: "Optional[Dict[str, Any]]" = None) -> SessionUpdate:
         """Initialize strategy."""
         
         # Validation part
@@ -52,7 +50,7 @@ class OntoKBResourceStrategy:
 
         return SessionUpdate()
 
-    def get(self, session: "Optional[Dict[str, Any]]" = None) -> "Dict[str, Any]":
+    def get(self, session: "Optional[Dict[str, Any]]" = None) -> SessionUpdateOntoKBResource:
         """Execute the strategy.
 
         This method will be called through the strategy-specific endpoint of the
@@ -72,24 +70,15 @@ class OntoKBResourceStrategy:
         if "sparql_query" in session and session["sparql_query"] != "":
             # SPARQL query defined
             print("[ONTOKB PLUGIN]: Getting query data")
-            reasoning = session["reasoning"] if "reasoning" in session else False
+            # reasoning = session["reasoning"] if "reasoning" in session else False
             url = self.resource_config.accessUrl + "/databases/" + self.resource_config.configuration.database + "/query"
-            response = requests.post(url, json={'query': session["sparql_query"], 'reasoning': reasoning})
-
-            result = response.json()
-
-            pass
-
         else:
             # SPARQL query doesn't exists
             print("[ONTOKB PLUGIN]: Getting all the data")
             url = self.resource_config.accessUrl + "/databases/" + self.resource_config.configuration.database
             response = requests.get(url)
 
-            result = response.json()
-
-            pass
-
+        result = response.json()
 
         # Save result in session
         return SessionUpdateOntoKBResource(ontokb_data = result)

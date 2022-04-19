@@ -1,15 +1,16 @@
 """SPARQL query filter strategy."""
-
 # pylint: disable=no-self-use,unused-argument
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, List
+from pydantic.dataclasses import dataclass
+from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from oteapi.models import SessionUpdate, AttrDict
-from typing import Any, Dict, Optional
-
 from oteapi.models.filterconfig import FilterConfig
+
+if TYPE_CHECKING:  # pragma: no cover
+    from typing import Any, Dict
+
 
 class SessionUpdateSPARQLQueryFilter(SessionUpdate):
     """Return model for `SPARQLQuery`."""
@@ -48,21 +49,24 @@ class SPARQLQueryFilterConfig(FilterConfig):
 class SPARQLQueryFilter:
     """SPARQL Filter Strategy."""
 
-    filter_config: "SPARQLQueryFilterConfig"
+    filter_config: SPARQLQueryFilterConfig
 
-    def initialize(self, session: "Optional[Dict[str, Any]]" = None) -> "Dict[str, Any]":
+    def initialize(self, session: "Optional[Dict[str, Any]]" = None) -> SessionUpdate:
         """Initialize strategy"""
-
         return SessionUpdate()
 
-    def get(self, session: "Optional[Dict[str, Any]]" = None) -> "Dict[str, Any]":
+    def get(self, session: "Optional[Dict[str, Any]]" = None) -> SessionUpdateSPARQLQueryFilter:
         """Execute the strategy.
+
         This method will be called through the strategy-specific endpoint of the
         OTE-API Services.
+
         Parameters:
             session: A session-specific dictionary context.
+
         Returns:
             Dictionary of key/value-pairs to be stored in the sessions-specific
             dictionary context.
+
         """
         return SessionUpdateSPARQLQueryFilter(sparql_query = self.filter_config.query, reasoning = self.filter_config.configuration.reasoning)

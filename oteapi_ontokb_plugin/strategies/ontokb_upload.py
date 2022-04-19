@@ -1,20 +1,20 @@
 """ONTOKB resource strategy class for uploading."""
-
 # pylint: disable=no-self-use,unused-argument
-from dataclasses import dataclass
-from fastapi import File
-from pydantic import Field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from oteapi.plugins import create_strategy
 
-from oteapi.models import SessionUpdate, AttrDict, DataCacheConfig
-from typing import Any, Dict, Optional
-from oteapi.models.resourceconfig import ResourceConfig
-from oteapi.strategies.download.file import FileResourceConfig
 from oteapi.datacache import DataCache
+from oteapi.models import AttrDict, DataCacheConfig, ResourceConfig, SessionUpdate
+from oteapi.strategies.download.file import FileResourceConfig
+from pydantic.dataclasses import dataclass
+from pydantic import Field
 
 import requests
+
+if TYPE_CHECKING:  # pragma: no cover
+    from typing import Any, Dict
+
 
 class OntoKBUploadConfig(AttrDict):
     """File-specific Configuration Data Model."""
@@ -54,9 +54,9 @@ class OntoKBResourceUploadConfig(ResourceConfig):
 class OntoKBUploadStrategy:
     """Upload Strategy."""
 
-    resource_config: "OntoKBResourceUploadConfig"
+    resource_config: OntoKBResourceUploadConfig
 
-    def initialize(self, session: "Optional[Dict[str, Any]]" = None) -> "Dict[str, Any]":
+    def initialize(self, session: "Optional[Dict[str, Any]]" = None) -> SessionUpdate:
         """Initialize strategy."""
         
         # Validation part
@@ -64,7 +64,7 @@ class OntoKBUploadStrategy:
 
         return SessionUpdate()
 
-    def get(self, session: "Optional[Dict[str, Any]]" = None) -> "Dict[str, Any]":
+    def get(self, session: "Optional[Dict[str, Any]]" = None) -> SessionUpdate:
         """Execute the strategy.
 
         This method will be called through the strategy-specific endpoint of the
@@ -93,7 +93,7 @@ class OntoKBUploadStrategy:
         content = cache.get(key) # BinaryData
 
         url = self.resource_config.accessUrl + "/databases/" + self.resource_config.configuration.database
-        response = requests.post(url, files={"ontology":(self.resource_config.configuration.filename, content)})
+        requests.post(url, files={"ontology":(self.resource_config.configuration.filename, content)})
 
         # Save result in session
         return SessionUpdate()
