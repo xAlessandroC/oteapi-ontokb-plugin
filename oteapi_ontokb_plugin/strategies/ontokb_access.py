@@ -71,13 +71,15 @@ class OntoKBResourceStrategy:
         if session and "sparql_query" in session and session["sparql_query"] != "":
             # SPARQL query defined
             print("[ONTOKB PLUGIN]: Getting query data")
-            # reasoning = session["reasoning"] if "reasoning" in session else False
+            reasoning = session["reasoning"] if "reasoning" in session else False
             url = (
                 self.resource_config.accessUrl
                 + "/databases/"
                 + self.resource_config.configuration.database
                 + "/query"
             )
+            response = requests.post(url, json={'query': session["sparql_query"], 'reasoning': reasoning})
+            
         else:
             # SPARQL query doesn't exists
             print("[ONTOKB PLUGIN]: Getting all the data")
