@@ -81,6 +81,9 @@ class OntoKBUploadStrategy:
         if cache.config.accessKey and cache.config.accessKey in cache:
             print("[ONTOKB UPLOAD PLUGIN]: Cached data")
             key = cache.config.accessKey
+        elif "key" in session:
+            print("[ONTOKB UPLOAD PLUGIN]: Found file strategy in pipeline")
+            key = session["key"]
         else:
             print(
                 "[ONTOKB UPLOAD PLUGIN]: Downloaded data by means of a filter strategy"
@@ -98,10 +101,13 @@ class OntoKBUploadStrategy:
             + "/databases/"
             + self.resource_config.configuration.database
         )
-        requests.post(
+        response = requests.post(
             url,
             files={"ontology": (self.resource_config.configuration.filename, content)},
         )
+
+        if response.status_code/100 != 2 :
+            raise Exception("Error during ontorec upload")
 
         # Save result in session
         return SessionUpdate()
