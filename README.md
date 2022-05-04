@@ -25,6 +25,7 @@ OTE-API OntoKB Plugin has been supported by the following projects:
 
 The OntoKB Plugin provides three kind of strategies:
 * The [sparql_query](#sparql-query) filter strategy
+* The [application_rdf](#application-rdf) parse strategy
 * The [ontokb_access](#ontokb-access) dateresource strategy
 * The [ontokb_upload](#ontokb-upload) dateresource strategy
 
@@ -57,6 +58,12 @@ sparql_query = client.create_filter(
     }
 )
 ```
+
+### Application RDF
+The application RDF strategy allows to parse a rdf/ttl file and make it available inside the pipeline session.
+It uses the download strategy to download the file, get the cache key and access to the content.
+
+The Media Type is ```application/rdf```
 
 ### OntoKB access
 The OntoKB access plugin provide a read-only access to the databases of your OntoKB instance. It check whether a sparql query is present in the cache and execute it, otherwise it returns all the data contained in the db. All the functionalities are executed through OntoREC.
@@ -99,8 +106,9 @@ configuration = {
     "datacache_config": DataCacheConfig # the configuration of the cache to use for retrieving the data
 }
 ```
+Be sure to use the proper extension in the filename property.
 
-and an example of the strategy created with the otelib library:
+and an example of the strategy created with the otelib library where the file to uploaded is downloaded by mean of a download strategy:
 ```python
 uploader = client.create_dataresource(
     accessUrl = "http://host.docker.internal:80",   # The address of your OntoREC instance
@@ -119,3 +127,35 @@ uploader = client.create_dataresource(
     }
 )
 ```
+
+If the content of the rdf/ttl file is in the cache you can use the datacache_configuration parameter and access direcly:
+```python
+uploader = client.create_dataresource(
+    accessUrl = "http://host.docker.internal:80",   # The address of your OntoREC instance
+    accessService = "datasource/ontokb_upload",
+    configuration = {
+        "database":"temp",
+        "filename":"full_ontology_inferred_remapped.rdf",
+        "datacache_config" : {
+            "accessKey" : "ceroh8fw45inf"
+        }
+    }
+)
+```
+
+Finally, you can put a download strategy in the pipeline and use its cached content.
+
+```python
+downloader = client.create_dataresource(
+    downloadUrl="file:///app/full_ontology_inferred_remapped.ttl",
+    mediaType="application/rdf",
+    configuration={
+        "text" : True,
+        "encoding" : "utf-8"
+    }
+)
+
+# OTELIB PIPEINE
+totalpipe = downloader >> uploader
+```
+
