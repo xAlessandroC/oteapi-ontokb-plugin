@@ -25,9 +25,9 @@ class OntoKBUploadConfig(AttrDict):
         None,
         description=("Name (with .rdf or .ttl extension) of the file to save"),
     )
-    fileConfig: Optional[FileResourceConfig] = Field(
+    downloadConfig: Optional[ResourceConfig] = Field(
         None,
-        description=("Configuration for the file strategy"),
+        description=("Configuration for the download strategy"),
     )
     datacache_config: Optional[DataCacheConfig] = Field(
         None,
@@ -86,10 +86,10 @@ class OntoKBUploadStrategy:
             key = session["key"]
         else:
             print(
-                "[ONTOKB UPLOAD PLUGIN]: Downloaded data by means of a filter strategy"
+                "[ONTOKB UPLOAD PLUGIN]: Downloaded data by means of a download strategy"
             )
             downloader = create_strategy(
-                "download", self.resource_config.configuration.fileConfig
+                "download", self.resource_config.configuration.downloadConfig
             )
             output = downloader.get()
             key = output["key"]
